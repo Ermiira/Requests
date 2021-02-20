@@ -1,0 +1,89 @@
+﻿@page "/donationdata/{did}"
+@inject HttpClient Http
+@inject NavigationManager navmenager;
+
+<div class="card card-body">
+    <div class="card card-title">
+            <h3>Ndryshimi i te dhenave</h3>
+     </div>
+    <hr />
+    <br />
+    <EditForm Model="@donation" OnValidSubmit="EditDonation">
+        <DataAnnotationsValidator />
+        <div class="row form-group">
+            <input hidden asp-for="did" @bind="@did" />
+            <div class="col-md-4 form-group">
+                <label>Kategoria</label>
+                <select class="form-control" @bind="@donation.CategoryId">
+                    <option value="">Zgjedh</option>
+                    @if (categorylist != null)
+                    {
+                        @foreach (var cat in categorylist)
+                        {
+                            <option class="form-control" value="@cat.CategoryId">@cat.CategoryName</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(()=>donation.CategoryId)" />
+            </div>
+            <div class="col-md-8 form-group">
+                <label>Title</label>
+                <InputText asp-for="Title" @bind-Value="@donation.Title" type="text" class="form-control"></InputText>
+                <ValidationMessage For="@(()=>donation.Title)" />
+            </div>
+
+        </div>
+        <div class="row form-group">
+            <div class="col-md-4 form-group">
+                <label>Phone number</label>
+                <InputText asp-for="PhoneNumber" @bind-Value="@donation.PhoneNumber" type="text" class="form-control"></InputText>
+                <ValidationMessage For="@(()=>donation.PhoneNumber)" />
+            </div>
+            <div class="col-md-4 form-group">
+                <label>Email</label>
+                <InputText asp-for="Email" @bind-Value="@donation.Email" type="text" class="form-control"></InputText>
+                <ValidationMessage For="@(()=>donation.Email)" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-12 form-group">
+                <label> Description</label>
+                <InputTextArea asp-for="Description" @bind-Value="@donation.Description" class="form-control"></InputTextArea>
+                <ValidationMessage For="@(()=>donation.Description)" />
+
+            </div>
+        </div>
+        <div class="row form-group">
+            <button type="submit" class="btn btn-light-primary">Ruaj</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public string did { get; set; }
+
+    DonationShared donation = new DonationShared();
+    List<CategoryViewModel> categorylist = new List<CategoryViewModel>();
+    List<CityViewModel> cityList = new List<CityViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        categorylist = await Http.GetJsonAsync<List<CategoryViewModel>>("api/donation/category");
+        cityList = await Http.GetJsonAsync<List<CityViewModel>>("api/request/city");
+        donation = await Http.GetJsonAsync<DonationShared>("/api/donation/donationdata?donationId=" + Convert.ToInt32(did));
+    }
+
+    protected async Task EditDonation()
+    {
+        await Http.SendJsonAsync(HttpMethod.Post, "api/donation/editdonation", donation);
+        navmenager.NavigateTo("/myprofile");
+    }
+
+    protected async Task cancel()
+    {
+
+    }
+
+}

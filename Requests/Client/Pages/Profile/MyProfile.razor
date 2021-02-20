@@ -1,0 +1,32 @@
+﻿@page "/myprofile"
+@inject HttpClient Http
+
+<div class="card card-body">
+    <h3>Postimet e mia</h3>
+    <div class="example-preview">
+        <ul class="nav nav-tabs nav-tabs-line">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#kt_tab_pane_1">Kerkesat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#kt_tab_pane_2">Donacionet</a>
+            </li>
+
+        </ul>
+        <div class="tab-content mt-5" id="myTabContent">
+            <div class="tab-pane fade active show" id="kt_tab_pane_1" role="tabpanel" aria-labelledby="kt_tab_pane_2">
+                 
+                <Requests.Client.Pages.Request.RequestProfile></Requests.Client.Pages.Request.RequestProfile>
+            </div>
+            <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel" aria-labelledby="kt_tab_pane_2">
+                <Requests.Client.Pages.Donation.DonationProfile></Requests.Client.Pages.Donation.DonationProfile>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+@code {
+
+}

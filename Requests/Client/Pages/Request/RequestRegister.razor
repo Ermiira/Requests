@@ -1,0 +1,145 @@
+﻿@page "/addrequest"
+@inject HttpClient Http
+@inject NavigationManager navmenager;
+@inject IJSRuntime JSRuntime;
+
+<div class="card card-body">
+    <div class="card-title">
+        <h3>RequestRegister </h3>
+    </div>
+   
+    <EditForm Model="@register" OnValidSubmit="CreateRequest">
+        <DataAnnotationsValidator />
+        <div class="row form-group">
+            <div class="col-md-4 form-group">
+                <label>Kategoria</label>
+                <select class="form-control" @bind="@register.CategoryId">
+                    <option value="">Zgjedh</option>
+                    @if (categorylist != null)
+                    {
+                        @foreach (var cat in categorylist)
+                        {
+                            <option class="form-control" value="@cat.CategoryId">@cat.CategoryName</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(()=>register.CategoryId)" />
+            </div>
+            <div class="col-md-8 form-group">
+                <label asp-for="Title">Title</label>
+                <InputText asp-for="Title" @bind-Value="@register.Title" type="text" class="form-control" />
+                <ValidationMessage For="@(()=>register.Title)" />
+            </div>
+
+
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-4 form-group">
+                <label>Qyteti</label>
+                <select class="form-control" @bind="@register.CityId">
+                    <option value="">Zgjedh</option>
+                    @if (cityList != null)
+                    {
+                        @foreach (var city in cityList)
+                        {
+                            <option class="form-control" value="@city.CityId">@city.Name</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(()=>register.CityId)" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label asp-for="Address">Address</label>
+                <input asp-for="Address" type="text" @bind="@register.Address" class="form-control" />
+                <ValidationMessage For="@(()=>register.Address)" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label asp-for="PostalCode">PostalCode</label>
+                <InputNumber asp-for="PostalCode" @bind-Value="@register.PostalCode" class="form-control"></InputNumber>
+                <ValidationMessage For="@(()=>register.PostalCode)" />
+            </div>
+
+
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-4 form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="text" @bind="@register.Email" class="form-control" />
+                <ValidationMessage For="@(()=>register.Email)" />
+            </div>
+            <div class="col-md-4 form-group">
+                <label asp-for="PhoneNumber">Phone number</label>
+                <input asp-for="PhoneNumber" placeholder="+383 4* *** ***" type="text" @bind="@register.PhoneNumber" class="form-control" />
+                <ValidationMessage For="@(()=>register.PhoneNumber)" />
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-12 form-group">
+                <label asp-for="Description">Description</label>
+                <textarea asp-for="Description" @bind="@register.Description" class="form-control" />
+                <ValidationMessage For="@(()=>register.Description)" />
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-primary" @onclick="@(e => cancel())">Cancel</button>
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+    RequestShared register = new RequestShared();
+    List<CategoryViewModel> categorylist = new List<CategoryViewModel>();
+    List<CityViewModel> cityList = new List<CityViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // await js.InvokeAsync<object>("Swal.fire", "Title", "Message", "Success");
+
+        //await js.InvokeAsync<object>("Swal.fire", Swal.Param());
+        categorylist = await Http.GetJsonAsync<List<CategoryViewModel>>("api/donation/category");
+        cityList = await Http.GetJsonAsync<List<CityViewModel>>("api/request/city");
+        await JSRuntime.InvokeVoidAsync("RequestInputMask");
+    }
+
+    protected async Task CreateEmployee()
+    {
+        //await js.InvokeAsync<object>("Swal.fire", "Title", "Message", "Success");
+        await Http.SendJsonAsync(HttpMethod.Post, "/api/request/register", register);
+        //UriHelper.NavigateTo("/fetchemployee");
+        //navmenager.NavigateTo("/");
+    }
+    protected async Task CreateRequest()
+    {
+        await Http.SendJsonAsync(HttpMethod.Post, "api/request/register", register);
+        navmenager.NavigateTo("/donations");
+    }
+
+    async Task cancel()
+    {
+        await JSRuntime.InvokeVoidAsync("Endriti");
+    }
+
+    //public class Swal
+    //{
+    //    public static Dictionary<string, object> Param()
+    //    {
+    //        Dictionary<string, object> param = new Dictionary<string, object>();
+    //        param.Add("title", "Title");
+    //        param.Add("text", "Title");
+    //        param.Add("showCancelButton", true);
+    //        param.Add("confirmButtonColor", "#3085d6");
+    //        param.Add("cancelButtonColor", "#d33");
+    //        param.Add("confirmButtonText", "Yes, delete it!");
+    //        return param;
+    //    }
+    //}
+}
+

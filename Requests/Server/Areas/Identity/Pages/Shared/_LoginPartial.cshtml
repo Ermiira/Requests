@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Requests.Server.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    var returnUrl = "/";
+    if (Context.Request.Query.TryGetValue("returnUrl", out var existingUrl)) {
+        returnUrl = existingUrl;
+    }
+}
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-dark" style="color:white !important;font-size:12px;padding-bottom:0;" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Përshëndetje, @UserManager.GetUserName(User).Split('@')[0]!</a>
+        </li>
+        <li class="nav-item form-inline"  >
+            <div class="">
+                <a href="/myprofile" class="pr-5" style="color:white !important;font-size:12px;padding-bottom:0;"> Profili </a>
+
+                @*<a id="manage" class="nav-link text-dark pr-5" style="color:white !important;font-size:12px;" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Profili</a>*@
+            </div>
+            <div>
+                <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })">
+                    <button id="logout" type="submit" style="color:white !important;font-size:12px;" class="nav-link btn btn-link text-dark">Shkycu</button>
+                </form>
+            </div>
+
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" style="color:white !important;font-size:12px;" id="register" asp-area="Identity" asp-page="/Account/Register">Regjistrohu</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" id="login" style="color:white !important;font-size:12px;" asp-area="Identity" asp-page="/Account/Login">Kycu</a>
+        </li>
+    }
+</ul>

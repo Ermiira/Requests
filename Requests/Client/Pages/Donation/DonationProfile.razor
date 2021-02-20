@@ -1,0 +1,127 @@
+﻿@page "/mydonations"
+@inject HttpClient Http
+@inject NavigationManager navmenager;
+
+
+<div class="row form-group">
+    <div class="col-md-6">
+        <h3 class="form-group">Donacionet e mia</h3>
+    </div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="col-md-6 text-right">
+                <button @onclick="@(e => AddDonation())" class="btn btn-light-primary"><i class="flaticon2-add-1"></i>Shto donacion </button>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+   
+
+</div>
+<br />
+
+@if (donations != null)
+{
+    <div class="row form-group">
+        @foreach (var item in donations)
+        {
+            <div class="col-xl-4">
+                <!--begin::Card-->
+                <div class="card card-custom gutter-b card-stretch">
+                    <!--begin::Body-->
+                    <div class="card-body">
+                        <!--begin::Info-->
+                        <div class="d-flex align-items-center">
+                            <!--begin::Pic-->
+                            <div class="flex-shrink-0 mr-4 symbol symbol-60 symbol-circle">
+                                <img src="@item.IconDisplay" alt="image">
+                            </div>
+                            <!--end::Pic-->
+                            <!--begin::Info-->
+                            <div class="d-flex flex-column mr-auto">
+                                <!--begin: Title-->
+                                <div class="d-flex flex-column mr-auto">
+                                    <a class="text-dark text-hover-primary font-size-h4 font-weight-bolder mb-1"> @item.Title </a>
+                                    <span class="text-muted font-weight-bold"> @item.UserId </span>
+                                </div>
+                                <!--end::Title-->
+                            </div>
+                            <!--end::Info-->
+
+                        </div>
+                        <!--end::Info-->
+                        <!--begin::Description-->
+                        <div class="mb-5 mt-5 font-weight-bold">
+                            <span class="text-dark-75 font-weight-bolder mr-2 text-left">Përshkrimi:</span><br />
+                            @item.Description
+                        </div>
+                        <!--end::Description-->
+                        <!--begin::Data-->
+                        <div class="mb-7">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-dark-75 font-weight-bolder mr-2">Email:</span>
+                                <a class="text-muted text-hover-primary">@item.Email</a>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-cente my-1">
+                                <span class="text-dark-75 font-weight-bolder mr-2">Phone:</span>
+                                <a class="text-muted text-hover-primary"> @item.PhoneNumber </a>
+                            </div>
+                            
+                        </div>
+                        <!--end::Data-->
+
+                    </div>
+                    <!--end::Body-->
+                    <!--begin::Footer-->
+                    <div class="card-footer d-flex align-items-center">
+
+                        <div class="d-flex">
+                            <div class="d-flex align-items-center mr-7">
+                                <a class="btn" href="/donationdata/@item.DonationId">  <i class="flaticon2-pen text-info"></i> Ndrysho </a>
+                            </div>
+                            
+                            <div class="d-flex align-items-center mr-7">
+                                
+                                <button class="btn" @onclick="@(e => DeleteDonation(item.DonationId))"> <i class="flaticon2-cross text-danger"></i> Fshije </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--end::Footer-->
+                </div>
+                <!--end:: Card-->
+            </div>
+        }
+    </div>
+}
+
+
+
+@code {
+
+    private List<DonationViewModel> donations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SomeStartupMethod();
+
+    }
+
+    public async Task<List<DonationViewModel>> SomeStartupMethod()
+    {
+        donations = await Http.GetFromJsonAsync<List<DonationViewModel>>($"api/donation/mydonations");
+        return donations;
+    }
+
+    public async Task AddDonation()
+    {
+        navmenager.NavigateTo("/adddonation");
+    }
+
+    public async Task DeleteDonation(int donationId)
+    {
+        await Http.DeleteAsync("api/donation/deletedonation/" + Convert.ToInt32(donationId));
+        navmenager.NavigateTo("/myprofile");
+
+    }
+  
+}

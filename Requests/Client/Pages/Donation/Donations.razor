@@ -1,0 +1,163 @@
+﻿@page "/donations"
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager navmenager
+
+<div class="card card-body">
+    <div class="row form-group">
+        <div class="col-md-6">
+            <h3 class="form-group">Donacionet</h3>
+        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="col-md-6 text-right">
+                    <button @onclick="@(e => AddDonation())" class="btn btn-light-primary"><i class="flaticon2-add-1"></i> Shto donacion </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        
+
+    </div>
+    <br />
+    <h6 class="form-group">Filtro te dhenat sipas kategorise </h6>
+    @if (categories != null)
+    {
+        <div class="row form-group justify-content-between pr-5 pl-8">
+            @foreach (var cat in categories)
+            {
+                <a @onclick="@(e => Filter(cat.CategoryId))">
+                    <div class="flex-shrink-0 mr-4 mt-lg-0 mt-3">
+                        <div class="symbol symbol-lg-75">
+                            <img alt="Pic" src="@cat.Icon" style="height:100px;width:200px;">
+                        </div>
+                        <div class="symbol symbol-lg-75 symbol-primary d-none">
+                            <span class="font-size-h3 font-weight-boldest">JM</span>
+
+                        </div>
+                        <p class="text-dark font-weight-bolder"> @cat.CategoryName</p>
+                    </div>
+                </a>
+            }
+        </div>
+
+        <div class="row">
+            <div class="col-md-6"></div>
+            <div class="col-md-6 text-right">
+                <button @onclick="@(e => RemoveFilter())" class="btn btn-light-primary">Largo filterin </button>
+            </div>
+        </div>
+    }
+    <br />
+    <h6 class="form-group"> Rezultati</h6>
+    @if (donations != null)
+    {
+        <div class="row form-group">
+            @foreach (var item in donations)
+            {
+                <div class="col-xl-4">
+                    <!--begin::Card-->
+                    <div class="card card-custom gutter-b card-stretch">
+                        <!--begin::Body-->
+                        <div class="card-body">
+                            <!--begin::Info-->
+                            <div class="d-flex align-items-center">
+                                <!--begin::Pic-->
+                                <div class="flex-shrink-0 mr-4 symbol symbol-60 symbol-circle">
+                                    <img src="@item.IconDisplay" alt="image">
+                                </div>
+                                <!--end::Pic-->
+                                <!--begin::Info-->
+                                <div class="d-flex flex-column mr-auto">
+                                    <!--begin: Title-->
+                                    <div class="d-flex flex-column mr-auto">
+                                        <a href="#" class="text-dark text-hover-primary font-size-h4 font-weight-bolder mb-1"> @item.Title </a>
+                                        <span class="text-muted font-weight-bold"> @item.UserId </span>
+                                    </div>
+                                    <!--end::Title-->
+                                </div>
+                                <!--end::Info-->
+
+                            </div>
+                            <!--end::Info-->
+                            <!--begin::Description-->
+                            <div class="mb-10 mt-5 font-weight-bold">  @item.Description </div>
+                            <!--end::Description-->
+                            <div class="mb-7">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">E-mail:</span>
+                                    <a href="#" class="text-muted text-hover-primary">@item.Email</a>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-cente my-1">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">Numri telefonit:</span>
+                                    <a href="#" class="text-muted text-hover-primary"> @item.PhoneNumber </a>
+                                </div>
+                                
+                            </div>
+                            
+
+                        </div>
+                        <!--end::Body-->
+                        <!--begin::Footer-->
+                        <div class="card-footer d-flex align-items-center">
+                            <div class="d-flex">
+                                <p class="pt-2">Publikuar më : &nbsp;&nbsp; </p>
+                                <span class="btn btn-light-primary btn-sm font-weight-bold btn-upper btn-text">14 Jan, 21</span>
+
+                            </div>
+                        </div>
+                        <!--end::Footer-->
+                    </div>
+                    <!--end:: Card-->
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <p> Nuk ka rezultat</p>
+        </div>
+    }
+</div>
+@code {
+    private List<DonationViewModel> donations;
+    private List<CategoryViewModel> categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCategories();
+        await SomeStartupMethod();
+
+    }
+
+
+    public async Task<List<DonationViewModel>> Filter(int categ)
+    {
+        donations = await Http.GetFromJsonAsync<List<DonationViewModel>>($"api/donation/donationlist?category={categ}");
+        return donations;
+    }
+
+    public async Task<List<DonationViewModel>> SomeStartupMethod()
+    {
+        donations = await Http.GetFromJsonAsync<List<DonationViewModel>>($"api/donation/alldonationlist");
+        return donations;
+    }
+
+    public async Task<List<CategoryViewModel>> GetCategories()
+    {
+        categories = await Http.GetFromJsonAsync<List<CategoryViewModel>>($"api/donation/category");
+        return categories;
+    }
+
+    public async Task AddDonation()
+    {
+        navmenager.NavigateTo("/adddonation");
+    }
+
+
+    public async Task<List<DonationViewModel>> RemoveFilter()
+    {
+        donations = await Http.GetFromJsonAsync<List<DonationViewModel>>($"api/donation/alldonationlist");
+        return donations;
+    }
+}

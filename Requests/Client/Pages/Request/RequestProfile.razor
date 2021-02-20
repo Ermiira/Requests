@@ -1,0 +1,155 @@
+﻿@page "/myrequests"
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager navmenager;
+
+  
+    <div class="row form-group">
+        <div class="col-md-6">
+            <h3 class="form-group">Kërkesat e mia</h3>
+        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="col-md-6 text-right">
+                    <button @onclick="@(e => AddRequest())" class="btn btn-light-primary"><i class="flaticon2-add-1"></i> Shto kërkesë </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+       
+    </div>
+    <br />
+     
+    @if (requests != null)
+    {
+        <div class="row form-group">
+            @foreach (var item in requests)
+            {
+                <div class="col-xl-4">
+                    <!--begin::Card-->
+                    <div class="card card-custom gutter-b card-stretch">
+                        <!--begin::Body-->
+                        <div class="card-body">
+                            <!--begin::Info-->
+                            <div class="d-flex align-items-center">
+                                <!--begin::Pic-->
+                                <div class="flex-shrink-0 mr-4 symbol symbol-60 symbol-circle">
+                                    <img src="@item.IconDisplay" alt="image">
+                                </div>
+                                <!--end::Pic-->
+                                <!--begin::Info-->
+                                <div class="d-flex flex-column mr-auto">
+                                    <!--begin: Title-->
+                                    <div class="d-flex flex-column mr-auto">
+                                        <a class="text-dark text-hover-primary font-size-h4 font-weight-bolder mb-1"> @item.Title </a>
+                                        <span class="text-muted font-weight-bold"> @item.UserId </span>
+                                    </div>
+                                    <!--end::Title-->
+                                </div>
+                                <!--end::Info-->
+
+                            </div>
+                            <!--end::Info-->
+                            <!--begin::Description-->
+                           
+                            <div class="mb-5 mt-5 font-weight-bold">
+                                <span class="text-dark-75 font-weight-bolder mr-2 text-left">Përshkrimi:</span><br />
+                                @item.Description
+                            </div>
+                            <!--end::Description-->
+                            <div class="mb-7">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">E-mail:</span>
+                                    <a class="text-muted text-hover-primary">@item.Email</a>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-cente my-1">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">Numri telefonit:</span>
+                                    <a class="text-muted text-hover-primary"> @item.PhoneNumber </a>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">Lokacioni:</span>
+                                    <span class="text-muted font-weight-bold"> @item.CityId , @item.Address , @item.PostalCode </span>
+                                </div>
+                            </div>
+
+                            <!--begin::Data-->
+                            <div class="d-flex mb-5">
+                                @if (item.Active == true)
+                                {
+                                    <span class="btn btn-light-primary btn-sm font-weight-bold btn-upper btn-text"> Aktive</span>
+
+                                }
+                                else
+                                {
+                                    <span class="btn btn-light-danger btn-sm font-weight-bold btn-upper btn-text"> Perfunduar</span>
+                                }
+                            </div>
+
+                            <!--end::Data-->
+
+                        </div>
+                        <!--end::Body-->
+                        <!--begin::Footer-->
+                        <div class="card-footer d-flex align-items-center">
+                            <div class="d-flex">
+                                <div class="d-flex align-items-center mr-7">
+
+                                    <a class="btn" href="/editrequest/@item.RequestId"> <i class="flaticon2-pen text-info"></i> Ndrysho </a>
+
+                                </div>
+                                @if (item.Active != false)
+                                {
+                                    <div class="d-flex align-items-center mr-7">
+                                        <a class="btn" @onclick="@(e => FinishRequest(item.RequestId))"><i class="flaticon2-check-mark text-success"></i> Perfundo </a>
+                                    </div>
+                                }
+
+                                <div class="d-flex align-items-center mr-7">
+                                    <a class="btn" @onclick="@(e => DeleteRequest(item.RequestId))"> <i class="flaticon2-cross text-danger"></i> Fshije </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end::Footer-->
+                    </div>
+                    <!--end:: Card-->
+                </div>
+            }
+        </div>
+    }
+ 
+
+@code {
+
+    private List<RequestViewModel> requests;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetMyRequests();
+
+    }
+
+    public async Task<List<RequestViewModel>> GetMyRequests()
+    {
+        requests = await Http.GetFromJsonAsync<List<RequestViewModel>>("api/request/myrequests");
+        return requests;
+    }
+
+    public async Task AddRequest()
+    {
+        navmenager.NavigateTo("/addrequest");
+    }
+
+    public async Task DeleteRequest(int requestId)
+    {
+        await Http.DeleteAsync("api/request/deleterequest/" + Convert.ToInt32(requestId));
+        navmenager.NavigateTo("/myprofile");
+
+    }
+
+    public async Task FinishRequest(int requestId)
+    {
+
+        await Http.SendJsonAsync(HttpMethod.Post, "api/request/finishrequest/" + Convert.ToInt32(requestId), null);
+        navmenager.NavigateTo("/myprofile");
+
+    }
+}
